@@ -5,7 +5,7 @@ const axios = require('axios');
 
 const app = express();
 const port = process.env.PORT || 3000;
-const API_SEMPAG = process.env.API_SEMPAG; // URL API Telkomsel yang disembunyikan
+const API_SEMPAG = process.env.API_SEMPAG; 
 
 app.use(cors());
 app.use(bodyParser.json());
