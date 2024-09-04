@@ -1,6 +1,7 @@
 {
-  "name": "redeem-voucher-telkomsel",
+  "name": "cuan-redeem",
   "version": "1.0.0",
+  "description": "tools untuk redeem voucher telkomsel",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js"
@@ -10,5 +11,7 @@
     "body-parser": "^1.20.0",
     "cors": "^2.8.5",
     "express": "^4.18.2"
-  }
+  },
+  "author": "Dedy Setiadi Pramadan",
+  "license": "MIT"
 }
