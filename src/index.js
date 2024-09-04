@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const path = require('path');
 const axios = require('axios');
 
 const app = express();
@@ -8,7 +9,7 @@ const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, '../public')));
 
 app.post('/api/redeem', async (req, res) => {
     const { hrn, msisdn, voucher_type } = req.body;
