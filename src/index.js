@@ -5,7 +5,7 @@ const axios = require('axios');
 
 const app = express();
 const port = process.env.PORT || 3000;
-const API_SEMPAG = process.env.API_SEMPAG; // Read the URL from environment variable
+const API_SEMPAG = process.env.API_SEMPAG;
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -81,7 +81,7 @@ app.get('/', (req, res) => {
     `);
 });
 
-// API endpoint
+// API endpoint for POST request
 app.post('/api/redeem', async (req, res) => {
     const { hrn, msisdn, no_captcha, recaptcharesponse, voucher_type } = req.body;
     try {
@@ -91,6 +91,23 @@ app.post('/api/redeem', async (req, res) => {
             no_captcha,
             recaptcharesponse,
             voucher_type
+        });
+        res.json(response.data);
+    } catch (error) {
+        res.status(error.response ? error.response.status : 500).json(error.response ? error.response.data : { error: 'Internal Server Error' });
+    }
+});
+
+// API endpoint for GET request with query parameters
+app.get('/api/redeem', async (req, res) => {
+    const { voucher, nomorhp } = req.query;
+    try {
+        const response = await axios.post(API_SEMPAG, {
+            hrn: voucher,
+            msisdn: nomorhp,
+            no_captcha: true,
+            recaptcharesponse: 'MG4sJ@b3MqUoMtdFRFWw2g7r',
+            voucher_type: 'voucher'
         });
         res.json(response.data);
     } catch (error) {
