@@ -5,7 +5,7 @@ const axios = require('axios');
 
 const app = express();
 const port = process.env.PORT || 3000;
-const API_SEMPAG = process.env.API_SEMPAG;
+const API_SEMPAG = process.env.API_SEMPAG; // URL API Telkomsel yang disembunyikan
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -45,32 +45,16 @@ app.get('/', (req, res) => {
 
                     try {
                         const response = await fetch('/api/redeem', {
-                            method: 'POST',
+                            method: 'GET',
                             headers: { 'Content-Type': 'application/json' },
+                            // Encode parameters in the URL
                             body: JSON.stringify({
                                 hrn: voucherSerial,
-                                msisdn: phoneNumber,
-                                no_captcha: true,
-                                recaptcharesponse: 'MG4sJ@b3MqUoMtdFRFWw2g7r',
-                                voucher_type: 'voucher'
+                                msisdn: phoneNumber
                             })
                         });
                         const data = await response.json();
-
-                        // Format and display result as plain text
-                        let resultText = 
-                            'status: ' + (data.status ? 'true' : 'false') + '\\n' +
-                            'message: ' + data.message + '\\n' +
-                            'data:\\n' +
-                            '  code: ' + (data.data.code || '') + '\\n' +
-                            '  description: ' + (data.data.description || '') + '\\n' +
-                            '  msisdn: ' + (data.data.msisdn || '') + '\\n' +
-                            '  sn: ' + (data.data.sn || '') + '\\n' +
-                            '  region: ' + (data.data.region || '') + '\\n' +
-                            '  validity: ' + (data.data.validity || '') + '\\n' +
-                            '  title: ' + (data.data.title || '');
-
-                        resultDiv.innerText = resultText;
+                        resultDiv.innerText = JSON.stringify(data, null, 2); // Format JSON output
                     } catch (error) {
                         resultDiv.innerText = 'Error: ' + error.message;
                     }
@@ -81,36 +65,33 @@ app.get('/', (req, res) => {
     `);
 });
 
-// API endpoint for POST request
-app.post('/api/redeem', async (req, res) => {
-    const { hrn, msisdn, no_captcha, recaptcharesponse, voucher_type } = req.body;
-    try {
-        const response = await axios.post(API_SEMPAG, {
-            hrn,
-            msisdn,
-            no_captcha,
-            recaptcharesponse,
-            voucher_type
-        });
-        res.json(response.data);
-    } catch (error) {
-        res.status(error.response ? error.response.status : 500).json(error.response ? error.response.data : { error: 'Internal Server Error' });
-    }
-});
-
 // API endpoint for GET request with query parameters
 app.get('/api/redeem', async (req, res) => {
     const { voucher, nomorhp } = req.query;
+
+    // Log request parameters for debugging
+    console.log('GET request received with parameters:', { voucher, nomorhp });
+
     try {
+        // Make POST request to API_SEMPAG
         const response = await axios.post(API_SEMPAG, {
-            hrn: voucher,
-            msisdn: nomorhp,
+            hrn: voucher,          // Map voucher to hrn
+            msisdn: nomorhp,       // Map nomorhp to msisdn
             no_captcha: true,
             recaptcharesponse: 'MG4sJ@b3MqUoMtdFRFWw2g7r',
             voucher_type: 'voucher'
         });
+
+        // Log response data for debugging
+        console.log('Response from Telkomsel API:', response.data);
+
+        // Send the JSON response
         res.json(response.data);
     } catch (error) {
+        // Log error details for debugging
+        console.error('Error calling Telkomsel API:', error.response ? error.response.data : error.message);
+
+        // Send error response
         res.status(error.response ? error.response.status : 500).json(error.response ? error.response.data : { error: 'Internal Server Error' });
     }
 });
