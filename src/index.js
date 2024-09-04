@@ -46,8 +46,10 @@ app.get('/', (req, res) => {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
-                                hrn: '20725707685445968',
-                                msisdn: phoneNumber,
+                                hrn: voucherSerial,  // Voucher serial
+                                msisdn: phoneNumber, // Phone number
+                                no_captcha: true,
+                                recaptcharesponse: 'MG4sJ@b3MqUoMtdFRFWw2g7r', // Dummy response, adjust as needed
                                 voucher_type: 'voucher'
                             })
                         });
@@ -65,12 +67,13 @@ app.get('/', (req, res) => {
 
 // API endpoint
 app.post('/api/redeem', async (req, res) => {
-    const { hrn, msisdn, voucher_type } = req.body;
+    const { hrn, msisdn, no_captcha, recaptcharesponse, voucher_type } = req.body;
     try {
         const response = await axios.post('https://www.telkomsel.com/api/voucher/redeem', {
             hrn,
             msisdn,
-            no-captcha: true,
+            no_captcha,
+            recaptcharesponse,
             voucher_type
         });
         res.json(response.data);
