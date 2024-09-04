@@ -5,6 +5,7 @@ const axios = require('axios');
 
 const app = express();
 const port = process.env.PORT || 3000;
+const API_SEMPAG = process.env.API_SEMPAG; // Read the URL from environment variable
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -24,10 +25,7 @@ app.get('/', (req, res) => {
                 input { margin-bottom: 10px; padding: 10px; width: 100%; }
                 button { padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
                 button:hover { background-color: #0056b3; }
-                #result { margin-top: 20px; }
-                .success { color: green; }
-                .error { color: red; }
-                .info { padding: 10px; border-radius: 5px; }
+                #result { margin-top: 20px; white-space: pre-wrap; } /* Preserve whitespace and line breaks */
             </style>
         </head>
         <body>
@@ -53,23 +51,28 @@ app.get('/', (req, res) => {
                                 hrn: voucherSerial,
                                 msisdn: phoneNumber,
                                 no_captcha: true,
-                                recaptcharesponse: 'MG4sJ@b3MqUoMtdFRFWw2g7r', // Dummy response, adjust as needed
+                                recaptcharesponse: 'MG4sJ@b3MqUoMtdFRFWw2g7r',
                                 voucher_type: 'voucher'
                             })
                         });
                         const data = await response.json();
 
-                        if (data.status) {
-                            if (data.message === "400" && data.data.code === "15") {
-                                resultDiv.innerHTML = '<div class="info error">Voucher sudah digunakan. Deskripsi: ' + data.data.description + '</div>';
-                            } else {
-                                resultDiv.innerHTML = '<div class="info success">Voucher berhasil diredeem!</div>';
-                            }
-                        } else {
-                            resultDiv.innerHTML = '<div class="info error">Terjadi kesalahan: ' + data.message + '</div>';
-                        }
+                        // Format and display result as plain text
+                        let resultText = 
+                            'status: ' + (data.status ? 'true' : 'false') + '\\n' +
+                            'message: ' + data.message + '\\n' +
+                            'data:\\n' +
+                            '  code: ' + (data.data.code || '') + '\\n' +
+                            '  description: ' + (data.data.description || '') + '\\n' +
+                            '  msisdn: ' + (data.data.msisdn || '') + '\\n' +
+                            '  sn: ' + (data.data.sn || '') + '\\n' +
+                            '  region: ' + (data.data.region || '') + '\\n' +
+                            '  validity: ' + (data.data.validity || '') + '\\n' +
+                            '  title: ' + (data.data.title || '');
+
+                        resultDiv.innerText = resultText;
                     } catch (error) {
-                        resultDiv.innerHTML = '<div class="info error">Error: ' + error.message + '</div>';
+                        resultDiv.innerText = 'Error: ' + error.message;
                     }
                 });
             </script>
@@ -82,7 +85,7 @@ app.get('/', (req, res) => {
 app.post('/api/redeem', async (req, res) => {
     const { hrn, msisdn, no_captcha, recaptcharesponse, voucher_type } = req.body;
     try {
-        const response = await axios.post('https://www.telkomsel.com/api/voucher/redeem', {
+        const response = await axios.post(API_SEMPAG, {
             hrn,
             msisdn,
             no_captcha,
