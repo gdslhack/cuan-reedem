@@ -24,6 +24,10 @@ app.get('/', (req, res) => {
                 input { margin-bottom: 10px; padding: 10px; width: 100%; }
                 button { padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
                 button:hover { background-color: #0056b3; }
+                #result { margin-top: 20px; }
+                .success { color: green; }
+                .error { color: red; }
+                .info { padding: 10px; border-radius: 5px; }
             </style>
         </head>
         <body>
@@ -46,17 +50,26 @@ app.get('/', (req, res) => {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
-                                hrn: voucherSerial,  // Voucher serial
-                                msisdn: phoneNumber, // Phone number
+                                hrn: voucherSerial,
+                                msisdn: phoneNumber,
                                 no_captcha: true,
                                 recaptcharesponse: 'MG4sJ@b3MqUoMtdFRFWw2g7r', // Dummy response, adjust as needed
                                 voucher_type: 'voucher'
                             })
                         });
                         const data = await response.json();
-                        resultDiv.innerText = JSON.stringify(data, null, 2);
+
+                        if (data.status) {
+                            if (data.message === "400" && data.data.code === "15") {
+                                resultDiv.innerHTML = '<div class="info error">Voucher sudah digunakan. Deskripsi: ' + data.data.description + '</div>';
+                            } else {
+                                resultDiv.innerHTML = '<div class="info success">Voucher berhasil diredeem!</div>';
+                            }
+                        } else {
+                            resultDiv.innerHTML = '<div class="info error">Terjadi kesalahan: ' + data.message + '</div>';
+                        }
                     } catch (error) {
-                        resultDiv.innerText = 'Error: ' + error.message;
+                        resultDiv.innerHTML = '<div class="info error">Error: ' + error.message + '</div>';
                     }
                 });
             </script>
